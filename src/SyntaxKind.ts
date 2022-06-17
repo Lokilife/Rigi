@@ -4,7 +4,6 @@ export enum SyntaxKind {
   // Literals
   NumberLiteral,
   StringLiteral,
-  ObjectLiteral,
 
   // Keywords
   AbstractKeyword,

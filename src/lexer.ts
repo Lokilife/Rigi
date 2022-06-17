@@ -1,49 +1,49 @@
-import { SyntaxKind } from "./SyntaxKind"
+import { SyntaxKind } from './SyntaxKind'
 
 const textToToken = {
-  "{": SyntaxKind.OpenBraceToken,
-  "}": SyntaxKind.CloseBraceToken,
-  "(": SyntaxKind.OpenParenToken,
-  ")": SyntaxKind.CloseParenToken,
-  "[": SyntaxKind.OpenBracketToken,
-  "]": SyntaxKind.CloseBracketToken,
-  ".": SyntaxKind.DotToken,
-  "...": SyntaxKind.DotDotDotToken,
-  ";": SyntaxKind.SemicolonToken,
-  ",": SyntaxKind.CommaToken,
-  "<": SyntaxKind.LessThanToken,
-  ">": SyntaxKind.GreaterThanToken,
-  "<=": SyntaxKind.LessThanEqualsToken,
-  ">=": SyntaxKind.GreaterThanEqualsToken,
-  "==": SyntaxKind.EqualsEqualsToken,
-  "!=": SyntaxKind.ExclamationEqualsToken,
-  "===": SyntaxKind.EqualsEqualsEqualsToken,
-  "!==": SyntaxKind.ExclamationEqualsEqualsToken,
-  "=>": SyntaxKind.EqualsGreaterThanToken,
-  "+": SyntaxKind.PlusToken,
-  "-": SyntaxKind.MinusToken,
-  "**": SyntaxKind.AsteriskAsteriskToken,
-  "*": SyntaxKind.AsteriskToken,
-  "/": SyntaxKind.SlashToken,
-  "%": SyntaxKind.PercentToken,
-  "++": SyntaxKind.PlusPlusToken,
-  "--": SyntaxKind.MinusMinusToken,
-  "<<": SyntaxKind.LessThanLessThanToken,
-  ">>": SyntaxKind.GreaterThanGreaterThanToken,
-  "&": SyntaxKind.AmpersandToken,
-  "|": SyntaxKind.BarToken,
-  "!": SyntaxKind.ExclamationToken,
-  "&&": SyntaxKind.AmpersandAmpersandToken,
-  "||": SyntaxKind.BarBarToken,
-  "?": SyntaxKind.QuestionToken,
-  "?.": SyntaxKind.QuestionDotToken,
-  ":": SyntaxKind.ColonToken,
-  "=": SyntaxKind.EqualsToken,
-  "+=": SyntaxKind.PlusEqualsToken,
-  "-=": SyntaxKind.MinusEqualsToken,
-  "*=": SyntaxKind.AsteriskEqualsToken,
-  "@": SyntaxKind.AtToken,
-  "`": SyntaxKind.BacktickToken,
+  '{': SyntaxKind.OpenBraceToken,
+  '}': SyntaxKind.CloseBraceToken,
+  '(': SyntaxKind.OpenParenToken,
+  ')': SyntaxKind.CloseParenToken,
+  '[': SyntaxKind.OpenBracketToken,
+  ']': SyntaxKind.CloseBracketToken,
+  '.': SyntaxKind.DotToken,
+  '...': SyntaxKind.DotDotDotToken,
+  ';': SyntaxKind.SemicolonToken,
+  ',': SyntaxKind.CommaToken,
+  '<': SyntaxKind.LessThanToken,
+  '>': SyntaxKind.GreaterThanToken,
+  '<=': SyntaxKind.LessThanEqualsToken,
+  '>=': SyntaxKind.GreaterThanEqualsToken,
+  '==': SyntaxKind.EqualsEqualsToken,
+  '!=': SyntaxKind.ExclamationEqualsToken,
+  '===': SyntaxKind.EqualsEqualsEqualsToken,
+  '!==': SyntaxKind.ExclamationEqualsEqualsToken,
+  '=>': SyntaxKind.EqualsGreaterThanToken,
+  '+': SyntaxKind.PlusToken,
+  '-': SyntaxKind.MinusToken,
+  '**': SyntaxKind.AsteriskAsteriskToken,
+  '*': SyntaxKind.AsteriskToken,
+  '/': SyntaxKind.SlashToken,
+  '%': SyntaxKind.PercentToken,
+  '++': SyntaxKind.PlusPlusToken,
+  '--': SyntaxKind.MinusMinusToken,
+  '<<': SyntaxKind.LessThanLessThanToken,
+  '>>': SyntaxKind.GreaterThanGreaterThanToken,
+  '&': SyntaxKind.AmpersandToken,
+  '|': SyntaxKind.BarToken,
+  '!': SyntaxKind.ExclamationToken,
+  '&&': SyntaxKind.AmpersandAmpersandToken,
+  '||': SyntaxKind.BarBarToken,
+  '?': SyntaxKind.QuestionToken,
+  '?.': SyntaxKind.QuestionDotToken,
+  ':': SyntaxKind.ColonToken,
+  '=': SyntaxKind.EqualsToken,
+  '+=': SyntaxKind.PlusEqualsToken,
+  '-=': SyntaxKind.MinusEqualsToken,
+  '*=': SyntaxKind.AsteriskEqualsToken,
+  '@': SyntaxKind.AtToken,
+  '`': SyntaxKind.BacktickToken,
 }
 
 const textToKeyword = {
@@ -125,16 +125,14 @@ const textToKeyword = {
 }
 
 interface Lexeme {
-  kind: SyntaxKind,
+  type: SyntaxKind
   value: string
 }
 
 export class Lexer {
   private position = 0
 
-  constructor(
-    private readonly text: string
-  ) {}
+  constructor(private readonly text: string) {}
 
   scan() {
     const lexemes: Lexeme[] = []
@@ -152,7 +150,7 @@ export class Lexer {
       case '\t':
       case '\n':
       case '\r':
-          return true
+        return true
       default:
         return false
     }
@@ -172,33 +170,42 @@ export class Lexer {
 
   private getLexeme(): Lexeme {
     if (this.isToken(this.getCurrentChar())) {
-      const fullTokenText = this.readUntil((char) => this.isIdentifier(char) || this.isWhitespaceLike(char))
+      const fullTokenText = this.readUntil(
+        (char) => this.isIdentifier(char) || this.isWhitespaceLike(char),
+      )
 
       if (!(fullTokenText in textToToken)) {
-        throw new Error(`Unexpected token ${fullTokenText} at position ${this.position}`)
+        throw new Error(
+          `Unexpected token ${fullTokenText} at position ${this.position}`,
+        )
       }
 
       return {
-        kind: textToToken[fullTokenText as keyof typeof textToToken],
+        type: textToToken[fullTokenText as keyof typeof textToToken],
         value: fullTokenText,
       }
     }
 
     if (this.isNumber(this.getCurrentChar()))
       return {
-        kind: SyntaxKind.NumberLiteral,
-        value: this.readUntil((char) => !this.isNumber(char))
+        type: SyntaxKind.NumberLiteral,
+        value: this.readUntil((char) => !this.isNumber(char)),
       }
 
     if (!this.isIdentifier(this.getCurrentChar()))
-      throw new Error(`Unknown token '${this.getCurrentChar()}' at position ${this.position}`)
+      throw new Error(
+        `Unknown token '${this.getCurrentChar()}' at position ${this.position}`,
+      )
 
-    const fullIdentifierText = this.readUntil((char) => this.isToken(char) || !this.isWhitespaceLike(char)).replaceAll(/\s+/g, '')
+    const fullIdentifierText = this.readUntil(
+      (char) => this.isToken(char) || !this.isWhitespaceLike(char),
+    ).replaceAll(/\s+/g, '')
 
-    const keyword = textToKeyword[fullIdentifierText as keyof typeof textToKeyword]
+    const keyword =
+      textToKeyword[fullIdentifierText as keyof typeof textToKeyword]
 
     return {
-      kind: keyword || SyntaxKind.Identifier,
+      type: keyword || SyntaxKind.Identifier,
       value: fullIdentifierText,
     }
   }
@@ -210,7 +217,11 @@ export class Lexer {
   private readUntil(pattern: (char: string) => boolean): string {
     let result = ''
 
-    for (let char = this.getCurrentChar(); !pattern(char); this.position++, char = this.getCurrentChar()) {
+    for (
+      let char = this.getCurrentChar();
+      !pattern(char);
+      this.position++, char = this.getCurrentChar()
+    ) {
       result += char
     }
 
