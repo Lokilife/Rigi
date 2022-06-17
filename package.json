@@ -1,0 +1,29 @@
+{
+  "name": "Rigi",
+  "version": "1.0.0",
+  "description": "A compiler for programming language with TypeScript-like syntax based on LLVM",
+  "main": "dist/index.js",
+  "scripts": {
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "start:dev": "node --loader esbuild-node-loader src/index.ts"
+  },
+  "keywords": [],
+  "author": {
+    "email": "lokilife0002@gmail.com",
+    "name": "Lokilife | Maxim Bychkov",
+    "url": "https://github.com/Lokilife"
+  },
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.28.0",
+    "@typescript-eslint/parser": "^5.28.0",
+    "esbuild-node-loader": "^0.8.0",
+    "eslint": "^8.17.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.7.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.1"
+  }
+}
