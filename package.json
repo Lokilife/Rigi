@@ -5,9 +5,11 @@
   "main": "dist/index.js",
   "scripts": {
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start:dev": "node --loader esbuild-node-loader src/index.ts"
+    "start:dev": "node --loader esbuild-node-loader src/index.ts",
+    "build": "pnpm tsc",
+    "start": "node dist/index.js"
   },
-  "keywords": [],
+  "keywords": ["rigi", "typescript", "llvm", "compiler"],
   "author": {
     "email": "lokilife0002@gmail.com",
     "name": "Lokilife | Maxim Bychkov",
