@@ -1,4 +1,4 @@
-import { SyntaxKind } from './SyntaxKind'
+import { SyntaxKind } from './enums/SyntaxKind'
 
 const textToToken = {
   '{': SyntaxKind.OpenBraceToken,
@@ -44,6 +44,7 @@ const textToToken = {
   '*=': SyntaxKind.AsteriskEqualsToken,
   '@': SyntaxKind.AtToken,
   '`': SyntaxKind.BacktickToken,
+  '//': SyntaxKind.SlashSlashToken,
 }
 
 const textToKeyword = {
@@ -137,16 +138,15 @@ export class Lexer {
   scan() {
     const lexemes: Lexeme[] = []
 
-    while (this.position < this.text.length) {
+    while (this.position != this.text.length - 1) {
       lexemes.push(this.getLexeme())
     }
 
     return lexemes
   }
 
-  isWhitespaceLike(char: string) {
+  isEOF(char: string) {
     switch (char) {
-      case ' ':
       case '\t':
       case '\n':
       case '\r':
@@ -156,23 +156,47 @@ export class Lexer {
     }
   }
 
+  isWhitespaceLike(char: string) {
+    return !!char.match(/\s/g)
+  }
+
+  isOperator(string: string) {
+    return !!string.match(/[+\-/*%!,?&|=<>]/g)
+  }
+
   isNumber(string: string) {
-    return !isNaN(+string)
+    return !!string.match(/[0-9]/g)
+  }
+
+  isStringEdge(char: string) {
+    switch (char) {
+      case "'":
+      case '"':
+        return true
+      default:
+        return false
+    }
   }
 
   isIdentifier(string: string) {
-    return !this.isNumber(string[0]) && !this.isToken(string)
+    return (
+      !this.isNumber(string[0]) &&
+      !this.isToken(string) &&
+      !this.isOperator(string) &&
+      !this.isWhitespaceLike(string)
+    )
   }
 
   isToken(string: string) {
-    return !!string.match(/[(){}!@?%^&*~`'";:.,-+|/\\<>=\n\r\t]/g)
+    return !!string.match(/[(){}@^~`;:.|]/g)
   }
 
   private getLexeme(): Lexeme {
+    if (this.isWhitespaceLike(this.getCurrentChar()))
+      this.readUntil((char) => !this.isWhitespaceLike(char))
+
     if (this.isToken(this.getCurrentChar())) {
-      const fullTokenText = this.readUntil(
-        (char) => this.isIdentifier(char) || this.isWhitespaceLike(char),
-      )
+      const fullTokenText = this.readUntil((char) => !this.isToken(char))
 
       if (!(fullTokenText in textToToken)) {
         throw new Error(
@@ -186,19 +210,68 @@ export class Lexer {
       }
     }
 
-    if (this.isNumber(this.getCurrentChar()))
+    if (this.isNumber(this.getCurrentChar())) {
       return {
         type: SyntaxKind.NumberLiteral,
         value: this.readUntil((char) => !this.isNumber(char)),
       }
+    }
 
-    if (!this.isIdentifier(this.getCurrentChar()))
+    if (this.isStringEdge(this.getCurrentChar())) {
+      this.position++
+      const result = {
+        type: SyntaxKind.StringLiteral,
+        value: this.readUntil((char) => this.isStringEdge(char)),
+      }
+      this.position++
+      return result
+    }
+
+    if (this.getCurrentChar() == '/') {
+      const nextChar = this.text[this.position + 1]
+
+      if (nextChar == '/')
+        return {
+          type: SyntaxKind.SlashSlashToken,
+          value: this.readUntil(this.isEOF),
+        }
+
+      if (nextChar == '*') {
+        this.position += 2
+        const result = {
+          type: SyntaxKind.MultilineComment,
+          value: this.readUntil(
+            (char) => char == '*' && this.text[this.position + 1] == '/',
+          ),
+        }
+        this.position += 2
+        return result
+      }
+    }
+
+    if (this.isOperator(this.getCurrentChar())) {
+      const fullOperatorText = this.readUntil((char) => !this.isOperator(char))
+
+      if (!(fullOperatorText in textToToken)) {
+        throw new Error(
+          `Unexpected token ${fullOperatorText} at position ${this.position}`,
+        )
+      }
+
+      return {
+        type: textToToken[fullOperatorText as keyof typeof textToToken],
+        value: fullOperatorText,
+      }
+    }
+
+    if (!this.isIdentifier(this.getCurrentChar())) {
       throw new Error(
         `Unknown token '${this.getCurrentChar()}' at position ${this.position}`,
       )
+    }
 
     const fullIdentifierText = this.readUntil(
-      (char) => this.isToken(char) || !this.isWhitespaceLike(char),
+      (char) => !this.isIdentifier(char),
     ).replaceAll(/\s+/g, '')
 
     const keyword =

@@ -106,7 +106,6 @@ export enum SyntaxKind {
   AsteriskAsteriskToken,
   AsteriskToken,
   SlashToken,
-  SlashAsteriskToken,
   SlashSlashToken,
   PercentToken,
   PlusPlusToken,
@@ -127,4 +126,7 @@ export enum SyntaxKind {
   AsteriskEqualsToken,
   AtToken,
   BacktickToken,
+
+  // Other
+  MultilineComment,
 }
